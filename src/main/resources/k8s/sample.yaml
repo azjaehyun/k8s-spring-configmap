@@ -1,0 +1,38 @@
+# configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8s-spring-configmap
+data:
+  application.properties: |-
+    server.port=7777
+---
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-spring-configmap-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-spring-configmap-app
+  template:
+    metadata:
+      labels:
+        app: k8s-spring-configmap-app
+    spec:
+      containers:
+        - name: k8s-spring-configmap-app
+          image: symjaehyun/k8s-spring-configmap:latest
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: /config/application.properties
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: k8s-spring-configmap
